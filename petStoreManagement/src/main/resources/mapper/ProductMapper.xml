@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.design.petStoreManagement.mapper.ProductMapper">
+
+    <resultMap type="com.design.petStoreManagement.pojo.Product" id="ProductMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="productNo" column="product_no" jdbcType="VARCHAR"/>
+        <result property="productName" column="product_name" jdbcType="VARCHAR"/>
+        <result property="units" column="units" jdbcType="VARCHAR"/>
+        <result property="images" column="images" jdbcType="VARCHAR"/>
+        <result property="total" column="total" jdbcType="INTEGER"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="prices" column="prices" jdbcType="NUMERIC"/>
+        <result property="num" column="num" jdbcType="INTEGER"/>
+        <result property="showIn" column="show_in" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ProductMap">
+        select
+          *
+        from product
+        where id = #{id}
+    </select>
+
+
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into product(product_no, product_name, units, images, total, created_at, created_by,  prices,num,show_in)
+        values (#{productNo}, #{productName}, #{units}, #{images}, #{total}, now(), #{createdBy},  #{prices},1,1)
+    </insert>
+        <!--用select进行分页查询-->
+      <select id="getPageListByCondition" resultMap="ProductMap">
+        select *  from product where created_at is not null
+          <!--商品编号搜索 不为空 则进入搜索条件-->
+          <if test="page.key.productNo != null and page.key.productNo != ''">
+              and  product_no like '%' #{page.key.productNo} '%'
+          </if>
+          <!--商品名称搜索 不为空 则进入搜索条件-->
+          <if test="page.key.productName != null and page.key.productName != ''">
+              and  product_name like '%' #{page.key.productName} '%'
+          </if>
+          <if test="page.key.showIn != null">
+              and  show_in = #{page.key.showIn}
+          </if>
+            <!--排序 desc是降序-->
+        order by
+        created_at desc
+        <!--分页查询-->
+      
+        limit  #{page.startNum} , #{page.pageSize}
+    </select>
+     <!--分页查询条数-->
+    <select id="getPageListCount" resultType="int">
+        select count(id) as count from product   where created_at is not null
+        <!--商品编号搜索 不为空 则进入搜索条件-->
+        <if test="page.key.productNo != null and page.key.productNo != ''">
+            and  product_no like '%' #{page.key.productNo} '%'
+        </if>
+        <!--商品名称搜索 不为空 则进入搜索条件-->
+        <if test="page.key.productName != null and page.key.productName != ''">
+            and  product_name like '%' #{page.key.productName} '%'
+        </if>
+        <if test="page.key.showIn != null">
+            and  show_in = #{page.key.showIn}
+        </if>
+    </select>
+
+   
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update product
+        <set>
+            <if test="productNo != null and productNo != ''">
+                product_no = #{productNo},
+            </if>
+            <if test="productName != null and productName != ''">
+                product_name = #{productName},
+            </if>
+            <if test="units != null and units != ''">
+                units = #{units},
+            </if>
+            <if test="images != null and images != ''">
+                images = #{images},
+            </if>
+            <if test="total != null">
+                total = #{total},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+            <if test="createdBy != null and createdBy != ''">
+                created_by = #{createdBy},
+            </if>
+            <if test="type != null and type != ''">
+                type = #{type},
+            </if>
+            <if test="prices != null">
+                prices = #{prices},
+            </if>
+            <if test="showIn != null">
+                show_in = #{showIn},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from product where id = #{id}
+    </delete>
+    <!--获取商品下拉数组-->
+     <select id="getProductList" resultMap="ProductMap">
+         select * from product where created_at is not null;
+     </select>
+    <!--根据商品名称获取数据-->
+    <select id="getByProductName" resultMap="ProductMap">
+        select * from product where product_name=#{productName} ;
+    </select>
+    <!--根据商品编号获取数据-->
+    <select id="queryByProductNo" resultMap="ProductMap">
+        select * from product  where product_no=#{productNo};
+    </select>
+    <select id="getIndexProductList" resultMap="ProductMap">
+        select * from product where created_at is not null and show_in =1 limit 8;
+    </select>
+</mapper>
+
